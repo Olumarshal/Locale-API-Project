@@ -1,61 +1,11 @@
-import express, { Application } from 'express';
-import mongoose from 'mongoose';
-import compression from 'compression';
-import cors from 'cors';
-import morgan from 'morgan';
-import helmet from 'helmet';
+import 'dotenv/config';
+import 'module-alias/register';
+import validateEnv from '@/utils/validateEnv';
+import App from './app';
+import UserController from './resources/user/user.controller';
 
-import Controller from '@/utils/interfaces/controller.interface';
-import ErrorMiddleware from '@/middleware/error.middleware';
+validateEnv();
 
-class App {
-    public express: Application;
-    public port: number;
+const app = new App([new UserController()], Number(process.env.PORT));
 
-    constructor(controllers: Controller[], port: number) {
-        this.express = express();
-        this.port = port;
-
-        this.initialiseDatabaseConnection();
-        this.initialiseMiddleware();
-        this.initialiseControllers(controllers);
-        this.initialiseErrorHandling();
-    }
-
-    private initialiseMiddleware(): void {
-        this.express.use(helmet());
-        this.express.use(cors());
-        this.express.use(morgan('dev'));
-        this.express.use(express.json());
-        this.express.use(express.urlencoded({ extended: false }));
-        this.express.use(compression());
-    }
-
-    private initialiseControllers(controllers: Controller[]): void {
-        controllers.forEach((controller: Controller) => {
-            this.express.use('/api/v1', controller.router);
-        });
-    }
-
-    private initialiseErrorHandling(): void {
-        this.express.use(ErrorMiddleware());
-    }
-
-    private initialiseDatabaseConnection(): void {
-        // TO DO: Set up my mongo variables
-
-        // const { MONGO_USER, MONGO_PASSWORD, MONGO_PATH } = process.env;
-
-        // mongoose.connect(
-        //     `mongodb+srv://${MONGO_USER}:${MONGO_PASSWORD}${MONGO_PATH}`
-        // );
-    }
-
-    public listen(): void {
-        this.express.listen(this.port, () => {
-            console.log(`App listening on port ${this.port}`);
-        });
-    }
-}
-
-export default App;
+app.listen();
