@@ -4,9 +4,11 @@ import compression from 'compression';
 import cors from 'cors';
 import morgan from 'morgan';
 import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 
 import Controller from '@/utils/interfaces/controller.interface';
 import ErrorMiddleware from '@/middleware/error.middleware';
+import RedisCache from './utils/cache';
 
 class App {
     public express: Application;
@@ -23,6 +25,16 @@ class App {
     }
 
     private initialiseMiddleware(): void {
+        this.express.use(
+            rateLimit({
+                windowMs: 60 * 1000, // 1 minute
+                max: 100, // maximum requests per minute
+                standardHeaders: true,
+                legacyHeaders: false,
+                message:
+                    'Too many requests from this IP, please try again later.',
+            })
+        );
         this.express.use(helmet());
         this.express.use(cors());
         this.express.use(morgan('dev'));
@@ -58,6 +70,7 @@ class App {
             console.log(`App listening on port ${this.port}`);
         });
     }
+
 }
 
 export default App;
