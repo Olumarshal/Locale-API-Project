@@ -16,12 +16,12 @@ class UserController implements Controller {
 
     private initialiseRoutes(): void {
         this.router.post(
-            `${this.path}/register`,
+            `${this.path}`,
             validationMiddleware(validate.register),
             this.register
         );
         this.router.post(
-            `${this.path}/login`,
+            `${this.path}`,
             validationMiddleware(validate.login),
             this.login
         );
@@ -41,9 +41,9 @@ class UserController implements Controller {
                 password
             );
 
-            res.status(201).json({ 
-                message: 'Registration Successful',
-                token 
+            res.status(201).json({
+                message: 'Registration Successful, Kindly store your token in a safe and secure place',
+                token,
             });
         } catch (error: any) {
             next(new HttpException(400, error.message));
@@ -60,12 +60,14 @@ class UserController implements Controller {
 
             const token = await this.userService.login(email, password);
 
-            res.status(200).json({ message: 'Login Successful', });
+            res.status(200).json({
+                message: 'Login Successful',
+                token,
+            });
         } catch (error: any) {
             next(new HttpException(400, error.message));
         }
     };
 }
-
 
 export default UserController;

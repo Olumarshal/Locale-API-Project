@@ -4,6 +4,7 @@ import HttpException from '@/utils/exceptions/http.exception';
 import validationMiddleware from '@/middleware/validation.middleware';
 import localeQuerySchema from '@/resources/locale/locale.validation';
 import LocaleService from '@/resources/locale/locale.service';
+import User from '@/resources/user/user.interface';
 import authenticated from '@/middleware/authenticated.middleware';
 import {
     RegionDocument,
@@ -12,6 +13,10 @@ import {
 } from '@/resources/locale/locale.interface';
 
 import RedisCache from '@/utils/cache';
+
+interface AuthenticatedRequest extends Request {
+    user: User;
+  }
 
 class LocaleController implements Controller {
     public path = '/locale';
@@ -24,20 +29,34 @@ class LocaleController implements Controller {
     }
 
     private initialiseRoutes(): void {
-        this.router.get(
+        const authenticatedMiddlewareWrapper = (
+            req: Request,
+            res: Response,
+            next: NextFunction
+          ): Promise<Response | void> => {
+            return authenticated(
+              req as AuthenticatedRequest,
+              res,
+              next as NextFunction
+            );
+          };
+      
+          this.router.get(
             `${this.path}/search`,
-            // authenticated,
+            authenticatedMiddlewareWrapper,
             validationMiddleware(localeQuerySchema),
             this.getLocationsData
-        );
+          );
     }
 
     private getLocationsData = async (
         req: Request,
         res: Response,
         next: NextFunction
-    ): Promise<Response | void> => {
-        const query: string = req.query.query?.toString() ?? '';
+      ): Promise<Response | void> => {
+        const authenticatedReq = req as AuthenticatedRequest;
+    
+        const query: string = authenticatedReq.query.query?.toString() ?? '';
 
         try {
             // Check if the data exists in cache
@@ -69,8 +88,8 @@ class LocaleController implements Controller {
 
             // Return the fetched data
             return res.json({ regions, states, lgas, region, state, lga });
-        } catch (error) {
-            return res.status(500).json({ error: 'Internal Server Error' });
+        } catch (error: any) {
+            next(new HttpException(500, error.message));
         }
     };
 }

@@ -4,7 +4,7 @@ import UserModel from '@/resources/user/user.model';
 import User from '@/resources/user/user.interface';
 import Token from '@/utils/interfaces/token.interface';
 import HttpException from '@/utils/exceptions/http.exception';
-import jwt, { JsonWebTokenError } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 
 interface AuthenticatedRequest extends Request {
   user: User;
@@ -24,11 +24,11 @@ async function authenticatedMiddleware(
   const accessToken = bearer.split('Bearer ')[1].trim();
 
   try {
-    const payload: Token | JsonWebTokenError = await verifyToken(
+    const payload: Token | jwt.JsonWebTokenError = await verifyToken(
       accessToken
     );
 
-    if (payload instanceof JsonWebTokenError) {
+    if (payload instanceof jwt.JsonWebTokenError) {
       return next(new HttpException(401, 'Unauthorized'));
     }
 
