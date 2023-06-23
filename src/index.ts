@@ -8,6 +8,6 @@ import LocaleController from './resources/locale/locale.controller';
 validateEnv();
 
 const app = new App([new UserController(), new LocaleController()],
-Number(process.env.PORT));
+Number(process.env.PORT || 3000));
 
 app.listen();
