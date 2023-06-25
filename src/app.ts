@@ -22,6 +22,7 @@ class App {
         this.initialiseMiddleware();
         this.initialiseControllers(controllers);
         this.initialiseErrorHandling();
+        this.initialiseHomeRoute();
     }
 
     private initialiseMiddleware(): void {
@@ -29,8 +30,6 @@ class App {
             rateLimit({
                 windowMs: 60 * 1000, // 1 minute
                 max: 100, // maximum requests per minute
-                standardHeaders: true,
-                legacyHeaders: false,
                 message:
                     'Too many requests from this IP, please try again later.',
             })
@@ -41,6 +40,12 @@ class App {
         this.express.use(express.json());
         this.express.use(express.urlencoded({ extended: false }));
         this.express.use(compression());
+    }
+
+    private initialiseHomeRoute(): void {
+        this.express.get('/', (req, res) => {
+            res.send("<h1>Locale API</h1><a href='/api-docs'>Documentation</a>");
+        });
     }
 
     private initialiseControllers(controllers: Controller[]): void {
@@ -58,19 +63,18 @@ class App {
 
         try {
             await mongoose.connect(`${MONGO_URL}`);
-            console.log('connected successfully');
+            console.log('Connected to the database successfully');
         } catch (error) {
-            console.error('Could not connect to DB');
+            console.error('Could not connect to the database');
             process.exit(1);
         }
     }
 
     public listen(): void {
-        this.express.listen(this.port, async () => {
+        this.express.listen(this.port, () => {
             console.log(`App listening on port ${this.port}`);
         });
     }
-
 }
 
 export default App;
