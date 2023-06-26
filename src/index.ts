@@ -7,7 +7,9 @@ import LocaleController from './resources/locale/locale.controller';
 
 validateEnv();
 
-const app = new App([new UserController(), new LocaleController()],
-Number(process.env.PORT || 8080));
+const app = new App(
+    [new UserController(), new LocaleController()],
+    Number(process.env.PORT || 8080)
+);
 
 app.listen();
