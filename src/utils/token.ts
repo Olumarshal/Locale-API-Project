@@ -24,4 +24,4 @@ export const verifyToken = async (
     });
 };
 
-export default{ createToken, verifyToken };
+export default { createToken, verifyToken };
