@@ -52,7 +52,8 @@
     "module-alias": "^2.2.2",
     "mongoose": "^7.2.1",
     "morgan": "^1.10.0",
-    "redis": "^4.6.7"
+    "redis": "^4.6.7",
+    "swagger-ui-express": "^4.6.3"
   },
   "_moduleAliases": {
     "@/resources": "dist/resources",

@@ -33,15 +33,6 @@ const register = Joi.object({
         }),
 });
 
-// const { error, value } = register.validate({});
-
-// if (error) {
-//     // Handle validation error
-//     console.error(error.details);
-// } else {
-//     // Proceed with registration logic
-//     console.log('User registration data is valid:', value);
-// }
 
 const login = Joi.object({
     email: Joi.string().email().required().messages({

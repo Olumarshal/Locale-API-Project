@@ -6,7 +6,7 @@ import validate from '@/resources/user/user.validation';
 import UserService from '@/resources/user/user.service';
 
 class UserController implements Controller {
-    public path = '/users';
+    public path = '/user';
     public router = Router();
     private userService = new UserService();
 
@@ -16,12 +16,12 @@ class UserController implements Controller {
 
     private initialiseRoutes(): void {
         this.router.post(
-            `${this.path}`,
+            `${this.path}/register`,
             validationMiddleware(validate.register),
             this.register
         );
         this.router.post(
-            `${this.path}`,
+            `${this.path}/login`,
             validationMiddleware(validate.login),
             this.login
         );
