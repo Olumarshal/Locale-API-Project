@@ -1,8 +1,11 @@
 openapi: 3.0.3
 info:
   title: Locale API
-  version: '1.0'
   contact: {}
+  version: '1.0'
+servers:
+  - url: https://locale-api.cyclic.app/api/v1
+    variables: {}
 paths:
   /user/register:
     post:
@@ -16,17 +19,17 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/RegisterUserRequest'
-            examples:
-              registerExample:
-                value:
-                  username: Butcher27
-                  email: itch56@gmail.com
-                  password: Mmjok784@3
+            example:
+              username: Butcher27
+              email: itch56@gmail.com
+              password: Mmjok784@3
       responses:
         '200':
           description: ''
           headers: {}
       deprecated: false
+      security: []
+    parameters: []
   /user/login:
     post:
       tags:
@@ -39,16 +42,16 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/LoginUserRequest'
-            examples:
-              loginExample:
-                value:
-                  email: itch56@gmail.com
-                  password: Mmjok784@3
+            example:
+              email: itch56@gmail.com
+              password: Mmjok784@3
       responses:
         '200':
           description: ''
           headers: {}
       deprecated: false
+      security: []
+    parameters: []
   /locale/search:
     get:
       tags:
@@ -60,9 +63,17 @@ paths:
           description: ''
           headers: {}
       deprecated: false
+      security:
+        - bearer: []
+    parameters: []
 components:
   schemas:
     RegisterUserRequest:
+      title: RegisterUserRequest
+      required:
+        - username
+        - email
+        - password
       type: object
       properties:
         username:
@@ -71,20 +82,21 @@ components:
           type: string
         password:
           type: string
+    LoginUserRequest:
+      title: LoginUserRequest
       required:
-        - username
         - email
         - password
-    LoginUserRequest:
       type: object
       properties:
         email:
           type: string
         password:
           type: string
-      required:
-        - email
-        - password
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
 security: []
 tags:
   - name: User
