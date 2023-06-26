@@ -1,0 +1,93 @@
+openapi: 3.0.3
+info:
+  title: Locale API
+  version: '1.0'
+  contact: {}
+paths:
+  /user/register:
+    post:
+      tags:
+        - User
+      summary: Register User
+      operationId: RegisterUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterUserRequest'
+            examples:
+              registerExample:
+                value:
+                  username: Butcher27
+                  email: itch56@gmail.com
+                  password: Mmjok784@3
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+  /user/login:
+    post:
+      tags:
+        - User
+      summary: Login User
+      operationId: LoginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginUserRequest'
+            examples:
+              loginExample:
+                value:
+                  email: itch56@gmail.com
+                  password: Mmjok784@3
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+  /locale/search:
+    get:
+      tags:
+        - Auth
+      summary: Get Locations
+      operationId: GetLocations
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+components:
+  schemas:
+    RegisterUserRequest:
+      type: object
+      properties:
+        username:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+      required:
+        - username
+        - email
+        - password
+    LoginUserRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      required:
+        - email
+        - password
+security: []
+tags:
+  - name: User
+    description: ''
+  - name: Auth
+    description: ''
