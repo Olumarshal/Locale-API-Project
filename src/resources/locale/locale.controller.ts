@@ -6,17 +6,17 @@ import localeQuerySchema from '@/resources/locale/locale.validation';
 import LocaleService from '@/resources/locale/locale.service';
 import User from '@/resources/user/user.interface';
 import authenticated from '@/middleware/authenticated.middleware';
+import { Region, State} from '@/resources/locale/locale.model';
 import {
     RegionDocument,
     StateDocument,
-    LGADocument,
 } from '@/resources/locale/locale.interface';
 
 import RedisCache from '@/utils/cache';
 
 interface AuthenticatedRequest extends Request {
     user: User;
-  }
+}
 
 class LocaleController implements Controller {
     public path = '/locale';
@@ -33,65 +33,91 @@ class LocaleController implements Controller {
             req: Request,
             res: Response,
             next: NextFunction
-          ): Promise<Response | void> => {
+        ): Promise<Response | void> => {
             return authenticated(
-              req as AuthenticatedRequest,
-              res,
-              next as NextFunction
+                req as AuthenticatedRequest,
+                res,
+                next as NextFunction
             );
-          };
-      
-          this.router.get(
-            `${this.path}/search`,
+        };
+
+        this.router.get(
+            `${this.path}/regions`,
             authenticatedMiddlewareWrapper,
             validationMiddleware(localeQuerySchema),
-            this.getLocationsData
-          );
+            this.searchRegions
+        );
+        this.router.get(
+            `${this.path}/states`,
+            authenticatedMiddlewareWrapper,
+            validationMiddleware(localeQuerySchema),
+            this.searchStates
+        );
     }
 
-    private getLocationsData = async (
+    private searchRegions = async (
         req: Request,
         res: Response,
         next: NextFunction
-      ): Promise<Response | void> => {
+    ): Promise<Response | void> => {
         const authenticatedReq = req as AuthenticatedRequest;
-    
         const query: string = authenticatedReq.query.query?.toString() ?? '';
 
         try {
-            // Check if the data exists in cache
             const cachedData = await this.cache.get(query);
             if (cachedData) {
                 return res.json(JSON.parse(cachedData));
             }
 
-            // Fetch location data from the database using the localeService
             const regions: RegionDocument[] =
-                await this.localeService.getAllRegionData();
-            const states: StateDocument[] =
-                await this.localeService.getAllStatesData();
-            const lgas: LGADocument[] =
-                await this.localeService.getAllLGAsData();
-            const region: RegionDocument | null =
-                await this.localeService.searchByRegion(query);
-            const state: StateDocument | null =
-                await this.localeService.searchByState(query);
-            const lga: LGADocument | null =
-                await this.localeService.searchByLGA(query);
+                await this.localeService.searchRegions(query);
+            const response: any = { regions };
 
-            // Cache the data
-            await this.cache.set(
-                query,
-                JSON.stringify({ regions, states, lgas, region, state, lga }),
-                3600
-            ); // Set a TTL of 1 hour (3600 seconds)
-
-            // Return the fetched data
-            return res.json({ regions, states, lgas, region, state, lga });
+            await this.cache.set(query, JSON.stringify({ response }), 60);
+            // await this.cache.set(query, JSON.stringify({ response }), 3600);
+            return res.json({ response });
         } catch (error: any) {
             next(new HttpException(500, error.message));
         }
     };
+
+    private searchStates = async (
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ): Promise<Response | void> => {
+        const authenticatedReq = req as AuthenticatedRequest;
+        const query: string = authenticatedReq.query.query?.toString() ?? '';
+
+        try {
+            const cachedData = await this.cache.get(query);
+            if (cachedData) {
+                return res.json(JSON.parse(cachedData));
+            }
+
+            const states: StateDocument[] =
+                await this.localeService.searchStates(query);
+            const response: any = { states };
+            response.states = await Promise.all(
+                states.map(async (state) => {
+                    const region: RegionDocument | null = await Region.findById(
+                        state.regionId
+                    );
+                    return {
+                        ...state.toObject(),
+                        region: region?.name, // Include the region name
+                    };
+                })
+            );
+
+            await this.cache.set(query, JSON.stringify({ response }), 3600);
+            return res.json({ response });
+        } catch (error: any) {
+            next(new HttpException(500, error.message));
+        }
+    };
+
+   
 }
 
 export default LocaleController;

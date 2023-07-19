@@ -1,4 +1,4 @@
-import { Document, Types } from 'mongoose';
+import mongoose, { Document, Types } from 'mongoose';
 
 export interface RegionDocument extends Document {
   name: string;
@@ -9,15 +9,9 @@ export interface RegionDocument extends Document {
 
 export interface StateDocument extends Document {
   name: string;
-  region: Types.ObjectId | RegionDocument;
+  regionId: mongoose.Types.ObjectId | RegionDocument;
   area: string;
   population: string;
-  lgas: Types.ObjectId[] | LGADocument[];
+  lgas: Types.ObjectId[];
 }
 
-export interface LGADocument extends Document {
-  name: string;
-  state: Types.ObjectId | StateDocument;
-  area: string;
-  population: string;
-}
